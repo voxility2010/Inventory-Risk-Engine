@@ -1,0 +1,35 @@
+### Create a constrained inventory position
+PUT http://127.0.0.1:8000/api/v1/inventory
+Content-Type: application/json
+
+{
+  "sku": "IPAD-MINI-128-BLU",
+  "product_name": "iPad Mini 128GB Blue",
+  "on_hand": 28,
+  "reorder_point": 30,
+  "daily_demand": 12,
+  "supplier_lead_days": 5
+}
+
+### Reserve stock; this produces an explainable critical alert
+POST http://127.0.0.1:8000/api/v1/events
+Content-Type: application/json
+
+{
+  "event_id": "evt-demo-2026-0001",
+  "event_type": "inventory_reserved",
+  "sku": "IPAD-MINI-128-BLU",
+  "quantity": 8
+}
+
+### Replaying the same event is safe and makes no extra stock mutation
+POST http://127.0.0.1:8000/api/v1/events
+Content-Type: application/json
+
+{
+  "event_id": "evt-demo-2026-0001",
+  "event_type": "inventory_reserved",
+  "sku": "IPAD-MINI-128-BLU",
+  "quantity": 8
+}
+

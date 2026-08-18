@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SupplyChain Sentinel | Operations Control Tower</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#0a0d13;
+  --bg-raised:#11151d;
+  --panel:#141922;
+  --panel2:#0d1119;
+  --line:#232a37;
+  --line-soft:#1b212c;
+  --ink:#eef1f6;
+  --dim:#8b93a7;
+  --dimmer:#5c6479;
+  --amber:#ffb454;
+  --amber-dim:#3a2e18;
+  --blue:#5b8cff;
+  --green:#4ade9a;
+  --green-dim:#123326;
+  --red:#ff5d6c;
+  --red-dim:#331419;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --display:'Space Grotesk',Inter,system-ui,sans-serif;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:
+    radial-gradient(1200px 600px at 15% -10%, #131a29 0%, transparent 60%),
+    var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px;border-radius:4px}
+
+.wrap{max-width:1180px;margin:auto;padding:48px 24px 80px}
+
+/* ---------- Header ---------- */
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:var(--amber);
+  background:var(--amber-dim);
+  border:1px solid #5a431f;
+  border-radius:999px;
+  padding:6px 12px 6px 10px;
+  font-family:var(--mono);
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.06em;
+}
+.eyebrow .dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--amber);
+  box-shadow:0 0 0 3px rgba(255,180,84,.18);
+}
+h1{
+  font-family:var(--display);
+  margin:16px 0 10px;
+  font-size:clamp(32px,4.6vw,46px);
+  letter-spacing:-.02em;
+  line-height:1.06;
+  font-weight:700;
+}
+.lede{
+  margin:0 0 6px;
+  color:#c3cade;
+  font-size:16px;
+  line-height:1.6;
+  max-width:640px;
+}
+.lede2{
+  margin:0;
+  color:var(--dim);
+  font-size:14px;
+  line-height:1.6;
+  max-width:640px;
+}
+.header-links{
+  display:flex;
+  gap:8px;
+  margin-top:22px;
+  flex-wrap:wrap;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  border:1px solid var(--line);
+  background:var(--bg-raised);
+  color:var(--ink);
+  padding:10px 16px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+  text-decoration:none;
+  font-size:13.5px;
+  font-family:var(--sans);
+  transition:border-color .15s,background .15s;
+}
+.btn:hover{border-color:#3a4356;background:#161c27}
+.btn.primary{
+  background:var(--amber);
+  border-color:var(--amber);
+  color:#1a1305;
+}
+.btn.primary:hover{background:#ffc272;border-color:#ffc272}
+.btn.ghost{background:transparent}
+.btn.danger{color:#ffb3ba}
+.btn:disabled{opacity:.5;cursor:wait}
+.btn:disabled:hover{background:var(--bg-raised);border-color:var(--line)}
+.btn.primary:disabled:hover{background:var(--amber)}
+.btn small{font-family:var(--mono);opacity:.7;font-weight:500}
+
+/* ---------- Section shell ---------- */
+.section-block{margin-top:64px}
+.section-kicker{
+  font-family:var(--mono);
+  font-size:11px;
+  font-weight:600;
+  color:var(--dimmer);
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  margin:0 0 8px;
+}
+.section-title{
+  font-family:var(--display);
+  font-size:24px;
+  font-weight:600;
+  margin:0 0 8px;
+  letter-spacing:-.01em;
+}
+.section-desc{
+  color:var(--dim);
+  font-size:14.5px;
+  line-height:1.6;
+  max-width:620px;
+  margin:0 0 28px;
+}
+
+/* ---------- Walkthrough ---------- */
+.run-panel{
+  display:grid;
+  grid-template-columns:minmax(0,380px) 1fr;
+  gap:16px;
+  align-items:stretch;
+}
+.steps{
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--panel);
+  overflow:hidden;
+}
+.step{
+  display:flex;
+  gap:14px;
+  padding:16px 18px;
+  border-bottom:1px solid var(--line-soft);
+  transition:background .2s;
+}
+.step:last-child{border-bottom:0}
+.step.active{background:#161f16}
+.step.done{background:transparent}
+.step-num{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--dimmer);
+  width:22px;
+  flex-shrink:0;
+  padding-top:2px;
+}
+.step.active .step-num,.step.done .step-num{color:var(--amber)}
+.step-body strong{
+  display:block;
+  font-size:14px;
+  margin-bottom:3px;
+  color:var(--ink);
+}
+.step-body p{
+  margin:0;
+  color:var(--dim);
+  font-size:12.5px;
+  line-height:1.55;
+}
+.step-status{
+  margin-left:auto;
+  flex-shrink:0;
+  font-family:var(--mono);
+  font-size:10.5px;
+  letter-spacing:.05em;
+  color:var(--dimmer);
+  align-self:flex-start;
+  padding-top:2px;
+}
+.step.active .step-status{color:var(--amber)}
+.step.done .step-status{color:var(--green)}
+
+.trace-panel{
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--panel2);
+  display:flex;
+  flex-direction:column;
+  min-height:340px;
+}
+.trace-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 16px;
+  border-bottom:1px solid var(--line-soft);
+}
+.trace-head .dots{display:flex;gap:6px}
+.trace-head .dots span{width:9px;height:9px;border-radius:50%;background:#2a3140}
+.trace-head .label{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--dimmer);
+  letter-spacing:.05em;
+}
+.trace-body{
+  flex:1;
+  padding:14px 16px;
+  font-family:var(--mono);
+  font-size:12.5px;
+  line-height:1.85;
+  overflow-y:auto;
+  max-height:420px;
+}
+.trace-line{white-space:pre-wrap;word-break:break-word;margin:0 0 2px}
+.trace-line .tag{font-weight:600}
+.tag-put{color:var(--blue)}
+.tag-event{color:var(--amber)}
+.tag-risk{color:var(--red)}
+.tag-replay{color:#b493ff}
+.tag-audit{color:var(--green)}
+.tag-err{color:var(--red)}
+.trace-empty{color:var(--dimmer)}
+.cursor{
+  display:inline-block;width:7px;height:14px;background:var(--amber);
+  vertical-align:-2px;animation:blink 1s step-end infinite;
+}
+@keyframes blink{50%{opacity:0}}
+
+.run-actions{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-top:18px;
+  flex-wrap:wrap;
+}
+.run-note{
+  font-size:12px;
+  color:var(--dimmer);
+  font-family:var(--mono);
+}
+
+/* ---------- Engineering choices ---------- */
+.choices{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+.choice{
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--panel);
+  padding:20px;
+}
+.choice .mark{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--amber);
+  margin-bottom:10px;
+  letter-spacing:.05em;
+}
+.choice strong{
+  display:block;
+  font-family:var(--display);
+  font-size:16px;
+  margin-bottom:8px;
+  font-weight:600;
+}
+.choice p{margin:0;color:var(--dim);font-size:13px;line-height:1.6}
+
+/* ---------- Full dashboard ---------- */
+.dash-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:16px;
+  flex-wrap:wrap;
+  margin-bottom:28px;
+}
+.banner{
+  display:none;
+  margin:0 0 20px;
+  padding:12px 14px;
+  border-radius:10px;
+  background:#161f16;
+  border:1px solid #3a4a2e;
+  color:#d9e3ff;
+  font-size:13.5px;
+}
+.banner.show{display:block}
+
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+  margin-bottom:14px;
+}
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:18px;
+}
+.card .label{
+  color:var(--dim);
+  font-family:var(--mono);
+  font-size:10.5px;
+  font-weight:600;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.card .n{font-family:var(--display);font-size:30px;font-weight:700;margin-top:8px}
+
+.dash-section{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:20px;
+  margin:14px 0;
+}
+.dash-section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:14px;
+}
+.dash-section-head h3{
+  font-family:var(--display);
+  font-size:15.5px;
+  margin:0;
+  font-weight:600;
+}
+.note{color:var(--dimmer);font-size:12px;font-family:var(--mono)}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{
+  color:var(--dim);
+  font-family:var(--mono);
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-weight:600;
+}
+td,th{text-align:left;padding:11px 9px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+tr:last-child td{border-bottom:0}
+pre{
+  margin:0;max-width:460px;background:var(--panel2);
+  border:1px solid var(--line-soft);border-radius:7px;padding:9px;
+  color:#c8d4ff;white-space:pre-wrap;word-break:break-word;
+  font-family:var(--mono);font-size:11px;
+}
+.critical{color:var(--red);font-weight:700}
+.warning{color:var(--amber);font-weight:700}
+.healthy{color:var(--green);font-weight:700}
+.empty{color:var(--dim);padding:12px 0;font-size:13.5px}
+
+.inventory-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.inventory-card{
+  background:var(--panel2);
+  border:1px solid var(--line-soft);
+  border-radius:11px;
+  padding:14px;
+}
+.inventory-card .label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+.inventory-card strong{display:block;margin:5px 0;font-family:var(--display);font-size:14.5px}
+.inventory-meta{color:var(--dim);font-size:12px;line-height:1.75;font-family:var(--mono)}
+
+.footer{
+  color:var(--dimmer);
+  font-size:12px;
+  margin-top:40px;
+  padding-top:24px;
+  border-top:1px solid var(--line-soft);
+  line-height:1.7;
+}
+
+@media(max-width:860px){
+  .run-panel{grid-template-columns:1fr}
+  .kpis{grid-template-columns:1fr 1fr}
+  .choices{grid-template-columns:1fr}
+  .inventory-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .wrap{padding:32px 16px 56px}
+  .kpis{grid-template-columns:1fr}
+  .dash-section{overflow-x:auto}
+  table{min-width:720px}
+}
+</style>
+</head>
+
+<body>
+<main class="wrap">
+
+  <!-- ================= HEADER / THESIS ================= -->
+  <header>
+    <span class="eyebrow"><span class="dot"></span>OPERATIONS CONTROL TOWER</span>
+    <h1>SupplyChain Sentinel</h1>
+    <p class="lede">
+      An event-driven inventory-risk service: it ingests stock events, scores stock-out
+      risk with rules you can read, and writes an audit trail you can trust.
+    </p>
+    <p class="lede2">
+      Built to show engineering judgment, not an AI trick — every decision below comes
+      from deterministic logic, not a model. Press play and watch the real API respond.
+    </p>
+    <div class="header-links">
+      <a class="btn ghost" href="/docs" target="_blank">API reference</a>
+      <a class="btn ghost" href="#dashboard">Full dashboard ↓</a>
+    </div>
+  </header>
+
+  <!-- ================= GUIDED WALKTHROUGH ================= -->
+  <section class="section-block">
+    <p class="section-kicker">01 — Watch it work</p>
+    <h2 class="section-title">Run the scenario</h2>
+    <p class="section-desc">
+      This fires real requests at the FastAPI service running this page — nothing here
+      is pre-recorded. One stock reservation is enough to flip a SKU from healthy to
+      critical, and a duplicate event is replayed on purpose to prove nothing double-counts.
+    </p>
+
+    <div class="run-panel">
+      <div class="steps" id="steps"></div>
+
+      <div class="trace-panel">
+        <div class="trace-head">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span class="label">live request trace</span>
+        </div>
+        <div class="trace-body" id="trace">
+          <p class="trace-line trace-empty">Press "Play the scenario" to begin<span class="cursor"></span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="run-actions">
+      <button class="btn primary" id="playBtn" onclick="playScenario()">Play the scenario</button>
+      <span class="run-note" id="runNote">sku: WALKTHRU-CAM-4K · resets on every replay</span>
+    </div>
+  </section>
+
+  <!-- ================= ENGINEERING CHOICES ================= -->
+  <section class="section-block">
+    <p class="section-kicker">02 — Why it's built this way</p>
+    <h2 class="section-title">Engineering choices worth asking about</h2>
+    <p class="section-desc">
+      Five decisions in this codebase that came up in past interviews — happy to walk
+      through any of them in more depth.
+    </p>
+
+    <div class="choices">
+      <div class="choice">
+        <div class="mark">01</div>
+        <strong>Idempotent by event ID</strong>
+        <p>Every event carries a unique ID. Replaying one returns the original result instead of mutating stock a second time — safe under retries or duplicate deliveries.</p>
+      </div>
+      <div class="choice">
+        <div class="mark">02</div>
+        <strong>Explainable, not opaque</strong>
+        <p>Risk scores come from named, readable rules — coverage days, reorder point, lead-time demand — not a black-box model. The factors are returned alongside the score.</p>
+      </div>
+      <div class="choice">
+        <div class="mark">03</div>
+        <strong>Immutable audit trail</strong>
+        <p>Every inventory change and every alert becomes its own audit record, so any state can be traced back to the exact event that caused it.</p>
+      </div>
+      <div class="choice">
+        <div class="mark">04</div>
+        <strong>Graceful evolution</strong>
+        <p>SQLite runs locally with zero setup. Docker Compose swaps in PostgreSQL with no application code changes — same models, same queries.</p>
+      </div>
+      <div class="choice">
+        <div class="mark">05</div>
+        <strong>Security-ready boundary</strong>
+        <p>API keys load from environment variables, and the dependency-injection layer leaves a clean seam for adding RBAC without restructuring routes.</p>
+      </div>
+      <div class="choice">
+        <div class="mark">06</div>
+        <strong>Deterministic decisions</strong>
+        <p>No LLM sits between an event and a stock mutation. The parts that decide are plain rules; anything probabilistic stays out of the critical path.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FULL DASHBOARD ================= -->
+  <section class="section-block" id="dashboard">
+    <p class="section-kicker">03 — Explore freely</p>
+    <div class="dash-top">
+      <div>
+        <h2 class="section-title" style="margin-bottom:4px">Full operations dashboard</h2>
+        <p class="section-desc" style="margin-bottom:0">Seed a broader scenario across all three risk tiers, or inspect everything the walkthrough just wrote.</p>
+      </div>
+      <div class="header-links" style="margin-top:0">
+        <button class="btn primary" id="loadBtn" onclick="loadDemo()">Seed demo data</button>
+        <button class="btn danger" id="resetBtn" onclick="resetDemo()">Reset demo data</button>
+      </div>
+    </div>
+
+    <div id="banner" class="banner"></div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="dash-section">
+      <div class="dash-section-head">
+        <h3>Open alerts</h3>
+        <span class="note" id="alertCount"></span>
+      </div>
+      <div id="alerts" class="empty">Loading operational data…</div>
+    </div>
+
+    <div class="dash-section">
+      <div class="dash-section-head">
+        <h3>Inventory positions</h3>
+        <span class="note">current risk assessment</span>
+      </div>
+      <div id="inventory" class="inventory-grid">
+        <div class="empty">Loading inventory…</div>
+      </div>
+    </div>
+
+    <div class="dash-section">
+      <div class="dash-section-head">
+        <h3>Recent audit trail</h3>
+        <span class="note">latest system actions</span>
+      </div>
+      <div id="audit" class="empty">Loading audit trail…</div>
+    </div>
+  </section>
+
+  <div class="footer">
+    Demo data uses DEMO-* and WALKTHRU-* identifiers and resets independently of any
+    inventory you create yourself through the API. Source and API docs linked above.
+  </div>
+
+</main>
+
+<script>
+const esc = (s) =>
+  String(s).replace(/[&<>"]/g, c => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;"
+  }[c]));
+
+const show = (message) => {
+  const banner = document.querySelector("#banner");
+  banner.textContent = message;
+  banner.classList.add("show");
+  setTimeout(() => banner.classList.remove("show"), 5000);
+};
+
+/* ============== GUIDED WALKTHROUGH ============== */
+const WALK_SKU = "WALKTHRU-CAM-4K";
+
+const STEPS = [
+  {
+    title: "Create an inventory position",
+    desc: "PUT /api/v1/inventory sets on-hand stock, reorder point, and daily demand."
+  },
+  {
+    title: "A customer order reserves stock",
+    desc: "POST /api/v1/events fires an inventory_reserved event; risk recalculates immediately."
+  },
+  {
+    title: "Risk is scored, explainably",
+    desc: "The response lists the exact factors behind the score — no opaque model."
+  },
+  {
+    title: "The same event replays",
+    desc: "A duplicate event_id is sent again on purpose. Stock does not move twice."
+  },
+  {
+    title: "It lands in the audit trail",
+    desc: "The mutation and the alert are both written as immutable audit records."
+  }
+];
+
+function renderSteps(activeIndex, doneCount) {
+  const el = document.querySelector("#steps");
+  el.innerHTML = STEPS.map((step, i) => {
+    let cls = "";
+    let status = "pending";
+    if (i < doneCount) { cls = "done"; status = "done"; }
+    else if (i === activeIndex) { cls = "active"; status = "running"; }
+    return `
+      <div class="step ${cls}">
+        <div class="step-num">${String(i + 1).padStart(2, "0")}</div>
+        <div class="step-body">
+          <strong>${step.title}</strong>
+          <p>${step.desc}</p>
+        </div>
+        <div class="step-status">${status}</div>
+      </div>
+    `;
+  }).join("");
+}
+renderSteps(-1, 0);
+
+function traceLine(tagClass, tagLabel, text) {
+  const body = document.querySelector("#trace");
+  if (body.querySelector(".trace-empty")) body.innerHTML = "";
+  const line = document.createElement("p");
+  line.className = "trace-line";
+  line.innerHTML = `<span class="tag ${tagClass}">[${tagLabel}]</span> ${esc(text)}`;
+  body.appendChild(line);
+  body.scrollTop = body.scrollHeight;
+}
+
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+async function playScenario() {
+  const button = document.querySelector("#playBtn");
+  button.disabled = true;
+  button.textContent = "Playing…";
+  document.querySelector("#trace").innerHTML = "";
+  const eventId = "walkthru-" + Date.now();
+
+  try {
+    renderSteps(0, 0);
+    traceLine("tag-put", "PUT", "/api/v1/inventory → creating WALKTHRU-CAM-4K (28 on hand, reorder at 30, demand 12/day, 5-day lead time)");
+    await wait(500);
+    const invRes = await fetch("/api/v1/inventory", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      body: JSON.stringify({
+        sku: WALK_SKU,
+        product_name: "4K Security Camera",
+        on_hand: 28,
+        reorder_point: 30,
+        daily_demand: 12,
+        supplier_lead_days: 5
+      })
+    });
+    if (!invRes.ok) throw new Error("Could not create inventory position");
+    const inv = await invRes.json();
+    traceLine("tag-put", "PUT", `201 Created → ${inv.sku} on hand: ${inv.on_hand}`);
+    await wait(700);
+
+    renderSteps(1, 1);
+    traceLine("tag-event", "EVENT", `/api/v1/events → inventory_reserved, qty 8, event_id ${eventId}`);
+    await wait(500);
+    const evRes = await fetch("/api/v1/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      body: JSON.stringify({
+        event_id: eventId,
+        event_type: "inventory_reserved",
+        sku: WALK_SKU,
+        quantity: 8
+      })
+    });
+    if (!evRes.ok) {
+      const errData = await evRes.json().catch(() => ({}));
+      throw new Error(errData.detail || "Could not process event");
+    }
+    const ev = await evRes.json();
+    traceLine("tag-event", "EVENT", `201 Created → on hand now ${ev.on_hand}`);
+    await wait(600);
+
+    renderSteps(2, 2);
+    traceLine("tag-risk", "RISK", `score ${ev.risk_score}/100 → ${ev.risk_level.toUpperCase()}`);
+    await wait(300);
+    for (const factor of ev.explanation) {
+      traceLine("tag-risk", "RISK", `· ${factor}`);
+      await wait(280);
+    }
+    await wait(500);
+
+    renderSteps(3, 3);
+    traceLine("tag-replay", "REPLAY", `resending event_id ${eventId} unchanged`);
+    await wait(600);
+    const replayRes = await fetch("/api/v1/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      body: JSON.stringify({
+        event_id: eventId,
+        event_type: "inventory_reserved",
+        sku: WALK_SKU,
+        quantity: 8
+      })
+    });
+    const replay = await replayRes.json();
+    traceLine(
+      "tag-replay",
+      "REPLAY",
+      `duplicate: ${replay.duplicate} → on hand still ${replay.on_hand} (no double-decrement)`
+    );
+    await wait(700);
+
+    renderSteps(4, 4);
+    traceLine("tag-audit", "AUDIT", "fetching /api/v1/dashboard to confirm the trail");
+    await wait(500);
+    const dashRes = await fetch("/api/v1/dashboard", { cache: "no-store" });
+    const dash = await dashRes.json();
+    const entries = dash.audit_log.filter(e => e.subject === WALK_SKU);
+    traceLine("tag-audit", "AUDIT", `${entries.length} record(s) written for ${WALK_SKU}`);
+    entries.slice(0, 3).forEach(e => traceLine("tag-audit", "AUDIT", `· ${e.action}`));
+
+    renderSteps(5, 5);
+    await wait(200);
+    traceLine("tag-audit", "DONE", "Scenario complete — scroll down to see this SKU in the full dashboard.");
+
+    await load();
+
+  } catch (error) {
+    traceLine("tag-err", "ERROR", error.message + " — is the server still running?");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Play the scenario";
+  }
+}
+
+/* ============== FULL DASHBOARD (existing behavior) ============== */
+async function load() {
+  try {
+    const response = await fetch("/api/v1/dashboard", { cache: "no-store" });
+    if (!response.ok) throw new Error("Dashboard request failed");
+    const data = await response.json();
+
+    document.querySelector("#kpis").innerHTML = [
+      ["Managed SKUs", data.kpis.skus],
+      ["Open Alerts", data.kpis.open_alerts],
+      ["Events Processed", data.kpis.events_processed]
+    ].map(item => `
+      <div class="card">
+        <div class="label">${item[0]}</div>
+        <div class="n">${item[1]}</div>
+      </div>
+    `).join("");
+
+    document.querySelector("#alertCount").textContent = `${data.kpis.open_alerts} open`;
+
+    if (data.alerts.length) {
+      document.querySelector("#alerts").innerHTML = `
+        <table>
+          <tr>
+            <th>SKU</th><th>Severity</th><th>Risk</th><th>Recommendation</th><th>Action</th>
+          </tr>
+          ${data.alerts.map(alert => `
+            <tr>
+              <td><strong>${esc(alert.sku)}</strong></td>
+              <td class="${esc(alert.severity)}">${esc(alert.severity.toUpperCase())}</td>
+              <td>${alert.risk_score}/100</td>
+              <td>${esc(alert.recommendation)}</td>
+              <td><button class="btn" style="padding:6px 10px;font-size:12px" onclick="resolve(${alert.id})">Resolve</button></td>
+            </tr>
+          `).join("")}
+        </table>
+      `;
+    } else {
+      document.querySelector("#alerts").innerHTML =
+        "No open risks. Play the scenario above or seed demo data to see the risk engine in action.";
+    }
+
+    if (data.inventory && data.inventory.length) {
+      document.querySelector("#inventory").innerHTML =
+        data.inventory.map(item => `
+          <div class="inventory-card">
+            <div class="label ${esc(item.risk)}">${esc(item.risk)}</div>
+            <strong>${esc(item.product_name)}</strong>
+            <div class="inventory-meta">
+              SKU: ${esc(item.sku)}<br>
+              On hand: ${item.on_hand}<br>
+              Reorder point: ${item.reorder_point}<br>
+              Daily demand: ${item.daily_demand}<br>
+              Supplier lead time: ${item.supplier_lead_days} days<br>
+              Risk score: ${item.risk_score}/100
+            </div>
+          </div>
+        `).join("");
+    } else {
+      document.querySelector("#inventory").innerHTML =
+        '<div class="empty">No inventory has been created yet.</div>';
+    }
+
+    if (data.audit_log.length) {
+      document.querySelector("#audit").innerHTML = `
+        <table>
+          <tr><th>Time</th><th>Action</th><th>SKU</th><th>Details</th></tr>
+          ${data.audit_log.map(entry => `
+            <tr>
+              <td>${new Date(entry.created_at).toLocaleString()}</td>
+              <td>${esc(entry.action)}</td>
+              <td>${esc(entry.subject)}</td>
+              <td><pre>${esc(JSON.stringify(entry.details, null, 2))}</pre></td>
+            </tr>
+          `).join("")}
+        </table>
+      `;
+    } else {
+      document.querySelector("#audit").innerHTML =
+        "Events will appear here after inventory updates.";
+    }
+
+  } catch (error) {
+    show(error.message);
+  }
+}
+
+async function loadDemo() {
+  const button = document.querySelector("#loadBtn");
+  button.disabled = true;
+  button.textContent = "Seeding…";
+  try {
+    const response = await fetch("/api/v1/demo/load", { method: "POST", cache: "no-store" });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || "Could not load demo");
+    show("Demo data seeded: critical, warning, and healthy inventory are now visible.");
+    await load();
+  } catch (error) {
+    show(error.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Seed demo data";
+  }
+}
+
+async function resetDemo() {
+  const button = document.querySelector("#resetBtn");
+  button.disabled = true;
+  button.textContent = "Resetting…";
+  try {
+    const response = await fetch("/api/v1/demo/reset", { method: "POST", cache: "no-store" });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || "Could not reset demo");
+    show("Demo data reset. Non-demo inventory is untouched.");
+    await load();
+  } catch (error) {
+    show(error.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Reset demo data";
+  }
+}
+
+async function resolve(id) {
+  try {
+    const response = await fetch(`/api/v1/alerts/${id}/resolve`, { method: "PATCH", cache: "no-store" });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.detail || "Could not resolve alert");
+    }
+    show("Alert resolved and recorded in the audit trail.");
+    await load();
+  } catch (error) {
+    show(error.message);
+  }
+}
+
+load();
+</script>
+</body>
+</html>
